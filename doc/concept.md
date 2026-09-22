@@ -5,6 +5,24 @@
 
 > Documento di **concept/pianificazione di prodotto**. Le scelte architetturali/tecnologiche sono deliberatamente **rimandate allo step successivo**.
 
+## Deliverable richiesti dall'hackathon
+
+### 01 · Learner Profile Statement
+Bambino/a **NAI (Neo Arrivato in Italia) di 6 anni, prima elementare**.
+**Difficoltà:** non parla né legge ancora l'italiano (difficoltà linguistiche) e ha bassa/nulla alfabetizzazione; spesso non può contare su supporto a casa (genitori a loro volta NAI) né su materiali cartacei, ma ha accesso a uno smartphone.
+**Scenario:** deve imparare a **tracciare lettere e numeri**, esercitandosi **in autonomia** sullo smartphone — a scuola e a casa — guidato da audio e icone, senza dipendere da un adulto.
+
+### 02 · Adaptive Evidence
+Esempio concreto (logica a regole, nessun LLM/ML):
+> Marco ricalca la lettera **A**; il dito esce dai bordi **3 volte di fila** → scatta la soglia di errore e l'app **mostra i puntini-guida** lungo il tratto e **ripete la consegna audio**. Nel tentativo successivo la % di tratto dentro i bordi risale sopra soglia → i **puntini spariscono** e l'esercizio torna "pulito". Se invece Marco resta in **stallo oltre soglia**, l'app **rileva il blocco**, chiude con riposo + fuochi d'artificio ("per oggi abbiamo finito, yuppi!") e segnala **cerotto + alert** alla maestra.
+
+La soluzione cambia quindi in base al **bisogno rilevato** (accuratezza sotto soglia → più supporto visivo/audio; accuratezza sopra soglia → supporto rimosso; frustrazione/stallo → chiusura protetta).
+
+### 03 · Learning Outcome Note
+**Prima:** il bambino non sa tracciare la lettera/numero e non riesce a restare entro i bordi senza aiuto.
+**Dopo (al termine di un ciclo di sessioni):** sa tracciare autonomamente la lettera/numero **restando entro i bordi, senza puntini-guida e senza hint**.
+**Come è verificato:** confronto oggettivo tra primo e ultimo tentativo sugli indicatori loggati — **% tratto dentro i bordi ↑**, **tempo e stalli ↓**, **numero di aiuti ↓** — mostrato come **trend nel report della maestra**. Nella demo lo dimostriamo con **dati storici finti + una sessione live**.
+
 ## Context
 
 Hackathon (5 ore, 2 persone: Pio Stravino + Manuel Bisanti). Tema scelto: **Educazione Digitale Inclusiva** — usare l'agentic coding per abbassare le barriere all'apprendimento digitale per persone in situazione di svantaggio.
