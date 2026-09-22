@@ -34,3 +34,5 @@ Concept completo: @doc/concept.md
 ## Metodo di lavoro (agentic)
 
 Explore → Plan → Implement → Verify. Plan mode sui pezzi ampi; `/clear` tra task scollegati; delega le esplorazioni rumorose ai subagenti. Rivedi sempre il diff prima del commit.
+
+**Pipeline richieste:** per una nuova richiesta (esercizio/variazione) usa `/feature "<richiesta>"` — orchestra intake→plan→build→verify→review riusando i subagenti `planner`, `builder`, `pwa-verifier`, `reviewer`. Il codice si scrive nel thread principale (diff revisionabile), non nei subagenti.
