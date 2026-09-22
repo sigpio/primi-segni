@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+coverage/
+*.local
+
+# database / dati generati
+*.db
+*.db-journal
+apps/api/data/
+
+# env
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+*.log
+
+# vite / pwa
+apps/web/dev-dist/
