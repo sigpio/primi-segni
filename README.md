@@ -6,11 +6,87 @@ Il nome richiama sia i *primi segni* grafici (i tratti di lettere e numeri) sia 
 
 Progetto sviluppato durante un hackathon (tema: **Educazione Digitale Inclusiva**).
 
+> L'app **non integra LLM né ML**: i comportamenti adattivi (feedback mirato sugli errori, rilevamento del blocco, puntini-guida) sono **logica deterministica a regole**, con le soglie in `packages/shared`.
+
 ## Documentazione
 
 - [Concept di prodotto](doc/concept.md) — profilo utente, scenario, metrica di miglioramento, capability, flussi, scope MVP e piano demo.
 
-## Note
+## Architettura
 
-- L'app **non integra LLM né ML**: i comportamenti adattivi (feedback mirato sugli errori, rilevamento del blocco) sono implementati come **logica deterministica a regole**.
-- Le scelte architetturali/tecnologiche sono definite in uno step successivo.
+Monorepo **npm workspaces** (Node 24, TypeScript ESM):
+
+```
+primi-segni/
+├── packages/shared   # tipi + soglie condivisi (il "contratto" web↔api)
+├── apps/api          # Fastify + node:sqlite (SSO finto, assegnazioni, report, seed)
+└── apps/web          # PWA React 19 + Vite + styled-components
+```
+
+- **Frontend**: React 19, Vite, styled-components, `vite-plugin-pwa`. Ricalco con Pointer Events + `isPointInStroke` (metrica "dentro i bordi") + `perfect-freehand` (inchiostro); audio consegne con Web Speech API (it-IT), effetti con Web Audio; fuochi con `canvas-confetti`.
+- **Backend**: Fastify + `node:sqlite` (SQLite integrato in Node 24, nessuna build nativa). In produzione **serve anche la PWA** (same-origin), API sotto `/api`.
+- **Rule engine** deterministico in `apps/web/src/rules/` (test con Vitest).
+
+## Prerequisiti
+
+- **Node 24** (vedi `.nvmrc`). Con nvm: `nvm use`.
+
+## Avvio in locale
+
+```bash
+npm install
+npm run dev
+```
+
+- Web (Vite): http://localhost:5173 — con proxy `/api` → API.
+- API (Fastify): http://localhost:3000.
+
+Il primo avvio dell'API popola automaticamente il DB demo se vuoto. Per **ripopolare** i dati (classe, 6 bambini, tentativi storici con trend, un blocco):
+
+```bash
+npm run seed
+```
+
+### Percorsi principali della PWA
+
+- `/` — scelta ruolo (bambino / maestra)
+- `/bambino` — griglia avatar → `/bambino/:id` (saluto + esercizio del giorno) → `/bambino/:id/esercizio` (ricalco)
+- `/maestra/login` (email demo: `giulia@scuola.it`) → `/maestra` (dashboard con report e assegnazioni)
+
+## Script
+
+| Comando | Effetto |
+| --- | --- |
+| `npm run dev` | Avvia API + web insieme |
+| `npm run build` | Build di produzione della PWA |
+| `npm run seed` | Ripopola il DB demo |
+| `npm run typecheck` | TypeScript su tutti i workspace |
+| `npm test` | Unit test (rule engine) |
+| `npm run verify` | typecheck + test + build |
+| `npm run start --workspace apps/api` | Avvia il servizio unico (API + PWA buildata) |
+
+## Build di produzione in locale (same-origin)
+
+```bash
+npm run build
+npm run start --workspace apps/api   # http://localhost:3000 serve PWA + /api
+```
+
+## Deploy (Render)
+
+Rilascio come **servizio unico** (Fastify serve PWA + API), auto-deploy da GitHub, HTTPS — configurato in [`render.yaml`](render.yaml).
+
+1. Su [render.com](https://render.com), accedi con GitHub.
+2. **New +** → **Blueprint** → seleziona il repo `sigpio/primi-segni` → **Apply**.
+3. A fine deploy apri l'URL HTTPS (es. `https://primi-segni.onrender.com`) — installabile come PWA dal cellulare ("Aggiungi a schermata Home").
+
+Ogni push su `main` rilascia in automatico. Nota: sul free tier il servizio va in *sleep* dopo inattività (primo caricamento più lento).
+
+## CI/CD
+
+- **CI** — GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): `typecheck + test + build` su push e PR.
+- **CD** — Render, auto-deploy su `main`.
+
+## Ambiente di sviluppo agentico (Claude Code)
+
+Il repo include un setup Claude Code: [`CLAUDE.md`](CLAUDE.md), permessi + hook di formattazione in `.claude/settings.json`, slash command in `.claude/commands/` (`/dev`, `/seed`, `/verify`, `/newexercise`) e il subagente `pwa-verifier`.
