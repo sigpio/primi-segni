@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: primi-segni
+    runtime: node
+    plan: free
+    region: frankfurt
+    autoDeployTrigger: commit
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start --workspace apps/api
+    healthCheckPath: /api/exercises
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.1
+      - key: NODE_OPTIONS
+        value: --disable-warning=ExperimentalWarning
