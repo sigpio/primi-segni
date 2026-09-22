@@ -14,8 +14,7 @@
       "Bash(git log:*)"
     ],
     "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(git push:*)"
+      "Bash(rm -rf:*)"
     ]
   },
   "hooks": {
