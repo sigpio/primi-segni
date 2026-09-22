@@ -31,7 +31,71 @@ function Sparkline({ trend }: { trend: TrendPoint[] }) {
   );
 }
 
+/** Descrive a parole i risultati del bambino (nessun voto, tono osservativo). */
+function describeReport(r: Report, exMap: Map<string, Exercise>): string[] {
+  if (r.attempts === 0) {
+    return [`${r.child.name} non ha ancora svolto nessun esercizio.`];
+  }
+  const lines: string[] = [];
+  lines.push(`${r.child.name} ha svolto ${r.attempts} eserciz${r.attempts === 1 ? 'io' : 'i'}.`);
+
+  const fav = exMap.get(r.favoriteExerciseId ?? '');
+  if (fav) lines.push(`L'esercizio che ripete più spesso è "${fav.label}".`);
+
+  if (r.latestAccuracy != null) {
+    lines.push(
+      `Nell'ultimo tentativo è rimasto sulla linea (dentro i bordi) nel ${Math.round(
+        r.latestAccuracy * 100,
+      )}% del tratto.`,
+    );
+  }
+
+  if (r.trend.length >= 2) {
+    const first = Math.round((r.trend[0]?.accuracy ?? 0) * 100);
+    const last = Math.round((r.trend.at(-1)?.accuracy ?? 0) * 100);
+    if (last - first >= 5) {
+      lines.push(`Sta migliorando con la pratica: la precisione è passata dal ${first}% al ${last}%.`);
+    } else if (first - last >= 5) {
+      lines.push(`La precisione è calata dal ${first}% al ${last}%.`);
+    } else {
+      lines.push(`La precisione è stabile intorno al ${last}%.`);
+    }
+    const h0 = r.trend[0]?.hintsUsed ?? 0;
+    const h1 = r.trend.at(-1)?.hintsUsed ?? 0;
+    if (h0 - h1 >= 1) lines.push('Chiede meno aiuti rispetto all’inizio: sta diventando più autonomo.');
+  }
+
+  if (r.needsHelp) {
+    lines.push('Attenzione: fatica a superare l’esercizio, potrebbe servire un supporto in più.');
+  }
+  if (r.blockAlert) {
+    lines.push('Attenzione: almeno una volta si è bloccato e l’app ha proposto una pausa.');
+  }
+  return lines;
+}
+
 const List = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 26, 74, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+`;
+
+const Modal = styled(Card)`
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -56,6 +120,7 @@ export function TeacherDashboard() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selected, setSelected] = useState('');
   const [toast, setToast] = useState('');
+  const [openReport, setOpenReport] = useState<Report | null>(null);
 
   const exMap = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
   const playable = exercises.filter((e) => e.playable);
@@ -123,27 +188,48 @@ export function TeacherDashboard() {
           <Row key={r.child.id}>
             <Avatar>{r.child.avatar}</Avatar>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 18 }}>
-                {r.child.name}{' '}
-                {r.needsHelp && <span title="Ha difficoltà">🩹</span>}
-                {r.blockAlert && <span title="Si è bloccato">🔔</span>}
-              </div>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{r.child.name}</div>
               <div style={{ color: '#6b5b8a', fontSize: 14 }}>
-                {r.attempts > 0 ? (
-                  <>
-                    preferito: <b>{exMap.get(r.favoriteExerciseId ?? '')?.label ?? '—'}</b> · precisione{' '}
-                    <b>{r.latestAccuracy != null ? Math.round(r.latestAccuracy * 100) : 0}%</b>
-                  </>
-                ) : (
-                  'nessuna prova ancora'
-                )}
+                {r.attempts > 0
+                  ? `${r.attempts} prove svolte`
+                  : 'nessuna prova ancora'}
               </div>
             </div>
-            <Sparkline trend={r.trend} />
-            <GhostButton onClick={() => assignOne(r.child.id)}>Assegna</GhostButton>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <GhostButton onClick={() => setOpenReport(r)}>📄 Report</GhostButton>
+              <GhostButton onClick={() => assignOne(r.child.id)}>Assegna</GhostButton>
+            </div>
           </Row>
         ))}
       </List>
+
+      {openReport && (
+        <Overlay onClick={() => setOpenReport(null)}>
+          <Modal onClick={(e) => e.stopPropagation()}>
+            <TopBar>
+              <div style={{ fontWeight: 800, fontSize: 22 }}>
+                {openReport.child.avatar} {openReport.child.name}
+              </div>
+              <GhostButton onClick={() => setOpenReport(null)}>Chiudi</GhostButton>
+            </TopBar>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {describeReport(openReport, exMap).map((line, i) => (
+                <p key={i} style={{ fontSize: 16, lineHeight: 1.5, color: '#2b1a4a' }}>
+                  {line}
+                </p>
+              ))}
+            </div>
+            {openReport.trend.length >= 2 && (
+              <div>
+                <div style={{ fontSize: 13, color: '#6b5b8a', marginBottom: 4 }}>
+                  Andamento della precisione
+                </div>
+                <Sparkline trend={openReport.trend} />
+              </div>
+            )}
+          </Modal>
+        </Overlay>
+      )}
     </Screen>
   );
 }

@@ -53,6 +53,6 @@ export function decideFeedback(input: {
   let message: string;
   if (errorKind === 'stall') message = 'Prova a seguire la linea con il dito!';
   else if (errorKind === 'out-of-bounds') message = 'Resta sulla linea, ci sei quasi!';
-  else message = 'Bravo, così!';
+  else message = 'Vai così!';
   return { errorKind, showGuideDots, message };
 }

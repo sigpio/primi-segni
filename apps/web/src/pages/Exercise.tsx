@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Exercise as Ex } from '@primi-segni/shared';
 import { api } from '../api';
-import { isPass } from '../rules/engine';
 import { TraceCanvas, type TraceApi, type TraceMetrics } from '../components/TraceCanvas';
 import { Fireworks } from '../components/Fireworks';
 import { speak } from '../audio/speech';
@@ -18,7 +17,6 @@ export function Exercise() {
   const [phase, setPhase] = useState<Phase>('trace');
   const [feedback, setFeedback] = useState('');
   const [fireworks, setFireworks] = useState(false);
-  const [pass, setPass] = useState(false);
   const [attemptKey, setAttemptKey] = useState(0);
 
   const finishApi = useRef<TraceApi | null>(null);
@@ -63,12 +61,10 @@ export function Exercise() {
 
   const onComplete = useCallback(
     (m: TraceMetrics) => {
-      const ok = isPass(m.accuracy);
-      setPass(ok);
       setPhase('done');
       setFireworks(true);
       playCheer();
-      speak(ok ? 'Bravissimo!' : 'Bravo, hai finito!');
+      speak('Evviva! Hai finito!');
       save(m, true, false);
     },
     [save],
@@ -98,7 +94,6 @@ export function Exercise() {
     setPhase('trace');
     setFeedback('');
     setFireworks(false);
-    setPass(false);
     setAttemptKey((k) => k + 1);
   };
 
@@ -113,14 +108,13 @@ export function Exercise() {
   }
 
   if (phase === 'done') {
-    const stars = pass ? '⭐⭐⭐' : '⭐⭐';
     return (
       <Screen>
         <Fireworks run={fireworks} />
         <Center>
-          <div style={{ fontSize: 64 }}>🎉</div>
-          <Title>{pass ? 'Bravissimo!' : 'Bravo!'}</Title>
-          <div style={{ fontSize: 44 }}>{stars}</div>
+          <div style={{ fontSize: 72 }}>🎉</div>
+          <Title>Evviva!</Title>
+          <Big>Hai finito! 💜</Big>
           <BigButton style={{ width: '100%' }} onClick={again}>
             🔁 Ancora una volta
           </BigButton>
