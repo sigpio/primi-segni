@@ -12,5 +12,6 @@ Grazie per la giornata: è stata davvero bella. Ecco qualche impressione a caldo
 ## Uno spunto per le prossime volte
 
 - **L'importanza della presentazione.** Flavio R. ha fatto notare quanto pesi il modo in cui il lavoro viene presentato, ed è verissimo: la presentazione del terzo posto, dal nostro punto di vista, è stata quella che ci ha colpito di più — chiara e professionale. Varrebbe la pena dare ancora più spazio (e magari qualche linea guida) alla parte di racconto del progetto.
+- **L'ambiente del repository.** Sarebbe preferibile ospitare i repository su un ambiente aziendale/interno così da evitare di pubblicare codice e materiali su un repository pubblico.
 
 Grazie ancora, alla prossima!
