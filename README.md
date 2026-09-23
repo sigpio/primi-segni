@@ -12,6 +12,7 @@ Progetto sviluppato durante un hackathon (tema: **Educazione Digitale Inclusiva*
 
 - [Concept di prodotto](doc/concept.md) — profilo utente, scenario, metrica di miglioramento, capability, flussi, scope MVP e piano demo.
 - [Presentazione del progetto](doc/presentazione/index.html) — deck navigabile (obiettivo, problema, soluzione, demo con screenshot reali, evoluzioni). Apri il file in un browser: frecce ← → per navigare, **N** per le note del relatore. Gli screenshot sono in [`doc/presentazione/screens/`](doc/presentazione/screens/).
+- [Feedback sull'hackathon](doc/feedback.md) — impressioni a caldo sulla giornata per i relatori.
 
 ## Architettura
 
