@@ -11,6 +11,7 @@ Progetto sviluppato durante un hackathon (tema: **Educazione Digitale Inclusiva*
 ## Documentazione
 
 - [Concept di prodotto](doc/concept.md) — profilo utente, scenario, metrica di miglioramento, capability, flussi, scope MVP e piano demo.
+- [Presentazione del progetto](doc/presentazione/index.html) — deck navigabile (obiettivo, problema, soluzione, demo con screenshot reali, evoluzioni). Apri il file in un browser: frecce ← → per navigare, **N** per le note del relatore. Gli screenshot sono in [`doc/presentazione/screens/`](doc/presentazione/screens/).
 
 ## Architettura
 
@@ -53,6 +54,21 @@ npm run seed
 - `/bambino` — griglia avatar → `/bambino/:id` (saluto + esercizio del giorno) → `/bambino/:id/esercizio` (ricalco)
 - `/maestra/login` (email demo: `giulia@scuola.it`) → `/maestra` (dashboard con report e assegnazioni)
 
+### API (Fastify, prefisso `/api`)
+
+| Metodo & path | Effetto |
+| --- | --- |
+| `POST /api/auth/sso` | Login finto maestra (valida l'email, ritorna token + maestra) |
+| `GET /api/exercises` | Catalogo esercizi |
+| `GET /api/classes/:id/children` | Bambini di una classe (griglia avatar) |
+| `GET /api/children?classId=…` | Elenco bambini con report (dashboard maestra) |
+| `GET /api/children/:id/report` | Report di un singolo bambino |
+| `GET /api/children/:id/today` | Esercizio assegnato "di oggi" (individuale, poi di classe) |
+| `POST /api/assignments` | Assegna un esercizio a un bambino o all'intera classe |
+| `POST /api/attempts` | Registra un tentativo (metriche); se `blocked`, logga anche un evento di riposo |
+
+Dati (SQLite `node:sqlite`): tabelle `classes`, `teachers`, `children`, `exercises`, `assignments`, `attempts`, `rest_events`. Il DB è un file locale non versionato (`apps/api/data/primi-segni.db`), rigenerabile con `npm run seed`; il seed parte in automatico al primo avvio se il DB è vuoto.
+
 ## Script
 
 | Comando | Effetto |
@@ -89,4 +105,4 @@ Ogni push su `main` rilascia in automatico. Nota: sul free tier il servizio va i
 
 ## Ambiente di sviluppo agentico (Claude Code)
 
-Il repo include un setup Claude Code: [`CLAUDE.md`](CLAUDE.md), permessi + hook di formattazione in `.claude/settings.json`, slash command in `.claude/commands/` (`/dev`, `/seed`, `/verify`, `/newexercise`) e il subagente `pwa-verifier`.
+Il repo include un setup Claude Code: [`CLAUDE.md`](CLAUDE.md), permessi + hook di formattazione in `.claude/settings.json`, slash command in `.claude/commands/` (`/dev`, `/seed`, `/verify`, `/newexercise`, `/review` e la pipeline `/feature`) e i subagenti in `.claude/agents/` (`planner`, `builder`, `pwa-verifier`, `reviewer`).

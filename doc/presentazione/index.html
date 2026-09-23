@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primi Segni — Presentazione di progetto</title>
+<style>
+  :root {
+    --ink: #0A0014;
+    --purple: #A100FF;
+    --purple-deep: #7500C0;
+    --purple-dark: #460073;
+    --purple-light: #BE82FF;
+    --purple-soft: #DCAFFF;
+    --magenta: #FF50A0;
+    --green: #34d399;
+    --amber: #f59e0b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--ink); color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+  body { display: flex; flex-direction: column; min-height: 100vh; padding: 22px 20px; }
+
+  /* Brand logo (Accenture) */
+  .acc-logo { height: 20px; width: auto; display: block; user-select: none; }
+  .acc-logo.big { height: 36px; margin: 0 auto 24px; }
+
+  /* Progress + toolbar */
+  #toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  #progress-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+  #progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--purple-light), var(--magenta)); transition: width 0.4s ease; border-radius: 99px; }
+  #counter { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); white-space: nowrap; }
+  #counter span { color: #fff; }
+  .toolbar-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); cursor: pointer; transition: border-color .2s, color .2s; font-size: 13px; }
+  .toolbar-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+  .toolbar-btn.active { border-color: rgba(161,0,255,0.6); background: rgba(161,0,255,0.15); color: var(--purple-light); }
+
+  /* Deck area */
+  #deck { display: flex; gap: 16px; width: 100%; flex: 1; min-height: 0; }
+  .slide { display: none; width: 100%; }
+  .slide.active { display: flex; flex-direction: column; }
+  .slide-stage { flex: 1; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(10,0,20,0.5); overflow: hidden; min-height: 0; }
+  .slide-content { padding: 40px 52px; height: 100%; display: flex; flex-direction: column; justify-content: center; overflow: auto; }
+
+  /* Notes panel */
+  .notes-panel { display: none; min-height: 120px; margin-top: 12px; border-radius: 16px; border: 1px solid rgba(161,0,255,0.25); background: rgba(161,0,255,0.06); padding: 18px 22px; }
+  .notes-panel.visible { display: block; }
+  .notes-label { font-size: 11px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--purple-light); margin-bottom: 8px; }
+  .notes-panel p { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+
+  /* Slide header */
+  .slide-header { margin-bottom: 24px; }
+  .kicker { font-size: 11px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--purple-light); }
+  .slide-header h2 { margin-top: 8px; font-size: clamp(26px, 3.6vw, 40px); font-weight: 700; line-height: 1.1; }
+  .subtitle { margin-top: 10px; font-size: 16px; color: rgba(255,255,255,0.6); max-width: 760px; }
+
+  /* Cover */
+  .cover-center { text-align: center; }
+  .cover-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); border-radius: 99px; padding: 6px 16px; font-size: 11px; font-weight: 600; letter-spacing: .25em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); display: inline-block; }
+  .cover-title { font-size: clamp(34px, 5vw, 60px); font-weight: 700; line-height: 1.02; margin: 22px auto 0; max-width: 820px; }
+  .closing-title { font-size: clamp(26px, 4vw, 44px); font-weight: 700; line-height: 1.1; margin: 20px auto 0; max-width: 820px; }
+  .cover-subtitle { font-size: 17px; color: rgba(255,255,255,0.65); max-width: 620px; margin: 16px auto 0; line-height: 1.6; }
+  .text-gradient { background: linear-gradient(135deg, var(--purple-light), var(--purple), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 26px; }
+  .chip { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); border-radius: 99px; padding: 6px 16px; font-size: 13px; color: rgba(255,255,255,0.75); }
+  .chip-purple { border-color: rgba(161,0,255,0.4); background: rgba(161,0,255,0.1); font-weight: 600; color: rgba(255,255,255,0.9); }
+
+  /* Bullets */
+  .bullets { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .bullets li { display: flex; align-items: flex-start; gap: 16px; }
+  .bullet-num { flex-shrink: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(161,0,255,0.15); font-size: 13px; font-weight: 700; color: var(--purple-light); margin-top: 2px; }
+  .bullets span:last-child { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+
+  /* Cards */
+  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cards-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .card { border-radius: 12px; border: 1px solid rgba(161,0,255,0.2); background: rgba(10,0,20,0.7); padding: 20px; }
+  .card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+  .card p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); }
+  .card .big-emoji { font-size: 26px; margin-bottom: 8px; }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step { display: flex; align-items: flex-start; gap: 20px; }
+  .step-num { font-size: 26px; font-weight: 700; color: rgba(161,0,255,0.55); font-variant-numeric: tabular-nums; line-height: 1; flex-shrink: 0; }
+  .step-body { flex: 1; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px; }
+  .step-body h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .step-body p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); }
+
+  /* Metrics */
+  .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 4px; }
+  .metric { border-radius: 14px; border: 1px solid rgba(161,0,255,0.2); background: rgba(10,0,20,0.7); padding: 22px; text-align: center; }
+  .metric .num { font-size: clamp(30px, 4vw, 44px); font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--purple-light), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .metric .lbl { margin-top: 10px; font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+
+  /* Phone screenshots */
+  .shots-row { display: flex; gap: 20px; justify-content: center; align-items: flex-end; height: 100%; flex-wrap: wrap; }
+  .phone { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .phone-frame { border-radius: 26px; border: 6px solid #1c0730; background: #1c0730; box-shadow: 0 20px 60px -18px rgba(161,0,255,0.55); overflow: hidden; }
+  .phone-frame img { display: block; height: 100%; width: auto; object-fit: contain; }
+  .phone-cap { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; max-width: 220px; }
+  .phone-cap b { color: var(--purple-light); }
+  /* sizes tuned so a row fits the stage */
+  .shots-3 .phone-frame { height: 56vh; max-height: 560px; }
+  .shots-2 .phone-frame { height: 60vh; max-height: 640px; }
+  .shots-1 .phone-frame { height: 62vh; max-height: 680px; }
+
+  .split { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 28px; align-items: center; height: 100%; }
+  .split .txt { display: flex; flex-direction: column; justify-content: center; }
+  .split .txt .kicker { margin-bottom: 8px; }
+  .split .txt h2 { font-size: clamp(24px, 3vw, 34px); font-weight: 700; line-height: 1.12; margin-bottom: 16px; }
+  .split .shots-row { align-items: center; }
+
+  .callout { border-radius: 12px; border: 1px solid rgba(52,211,153,0.28); background: rgba(52,211,153,0.06); padding: 14px 18px; font-size: 15px; color: #d1fae5; line-height: 1.5; }
+  .callout.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); color: #fde68a; }
+  .callout.purple { border-color: rgba(161,0,255,0.35); background: rgba(161,0,255,0.08); color: var(--purple-soft); }
+
+  .badge-2nd { display:inline-flex; align-items:center; gap:8px; border:1px solid rgba(245,158,11,0.4); background:rgba(245,158,11,0.1); color:#fde68a; border-radius:99px; padding:6px 16px; font-size:13px; font-weight:700; }
+
+  /* Do / Don't */
+  .dodont-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .dont-col, .do-col { border-radius: 12px; padding: 20px; }
+  .dont-col { border: 1px solid rgba(251,113,133,0.25); background: rgba(251,113,133,0.05); }
+  .do-col { border: 1px solid rgba(52,211,153,0.25); background: rgba(52,211,153,0.05); }
+  .dont-col h3 { font-size: 16px; font-weight: 600; color: #fecdd3; margin-bottom: 16px; }
+  .do-col h3 { font-size: 16px; font-weight: 600; color: #d1fae5; margin-bottom: 16px; }
+  .dodont-grid ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .dodont-grid li { display: flex; gap: 12px; color: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.5; }
+  .x-mark { color: #f87171; font-weight: 700; flex-shrink: 0; }
+  .check-mark { color: #34d399; font-weight: 700; flex-shrink: 0; }
+
+  /* Navigation */
+  #nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; }
+  #dots { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; flex-wrap: wrap; }
+  .dot-btn { width: 6px; height: 6px; border-radius: 99px; border: none; background: rgba(255,255,255,0.2); cursor: pointer; transition: width .3s, background .3s; padding: 0; }
+  .dot-btn.active { width: 24px; background: var(--purple); }
+  .btn-prev { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; border-radius: 99px; padding: 10px 20px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); cursor: pointer; transition: border-color .2s, color .2s; }
+  .btn-prev:hover:not(:disabled) { border-color: rgba(255,255,255,0.3); color: #fff; }
+  .btn-prev:disabled { opacity: .3; cursor: not-allowed; }
+  .btn-next { display: inline-flex; align-items: center; gap: 8px; border: none; background: var(--purple); border-radius: 99px; padding: 10px 24px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: transform .2s; box-shadow: 0 0 40px -8px rgba(161,0,255,0.6); }
+  .btn-next:hover:not(:disabled) { transform: scale(1.03); }
+  .btn-next:disabled { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); box-shadow: none; cursor: not-allowed; }
+  #hint { text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <img class="acc-logo" src="screens/accenture-white.png" alt="Accenture">
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <div id="counter"><span id="cur">01</span> / <span id="tot">13</span></div>
+  <button class="toolbar-btn" id="notes-toggle" title="Mostra/nascondi note relatore (N)" aria-label="Note relatore">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>
+  </button>
+</div>
+
+<div id="deck">
+
+  <!-- 0 · COVER -->
+  <div class="slide" data-index="0">
+    <div class="slide-stage"><div class="slide-content"><div class="cover-center">
+      <img class="acc-logo big" src="screens/accenture-white.png" alt="Accenture">
+      <span class="cover-badge"><span class="dot"></span>Hackathon · Educazione Digitale Inclusiva</span>
+      <h2 class="cover-title"><span class="text-gradient">Primi Segni</span></h2>
+      <p class="cover-subtitle">Una PWA che insegna ai bambini appena arrivati in Italia a ricalcare lettere e numeri <b>in autonomia</b> — guidati da audio e icone, con un report per la maestra.</p>
+      <div style="margin-top:22px"><span class="badge-2nd">🥈 2° posto</span></div>
+      <div class="chips"><span class="chip">Audio-first</span><span class="chip">Ricalco col dito</span><span class="chip">Feedback a regole</span><span class="chip">Zero LLM/ML</span><span class="chip">Report maestra</span></div>
+    </div></div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Questa è Primi Segni: il nostro progetto da hackathon, arrivato secondo. Il nome richiama i primi segni grafici — i tratti di lettere e numeri — e i primi passi di un bambino in un Paese nuovo. In dieci minuti vi mostro il problema che risolve, come funziona dal vivo, e dove può andare. Cinque parole chiave da tenere a mente: audio-first, ricalco, feedback a regole, nessun modello AI a runtime, e il report per la maestra.</p></div>
+  </div>
+
+  <!-- 1 · PROBLEMA -->
+  <div class="slide" data-index="1">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">Il problema</span>
+        <h2>Un bambino di 6 anni, appena arrivato, che deve imparare a scrivere</h2>
+        <p class="subtitle">Profilo NAI (Neo Arrivato in Italia), prima elementare. Un profilo preciso, non generico.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card"><div class="big-emoji">🗣️</div><h3>Non parla ancora l'italiano</h3><p>Difficoltà linguistiche e alfabetizzazione bassa o nulla: non può leggere le consegne scritte.</p></div>
+        <div class="card"><div class="big-emoji">🏠</div><h3>La famiglia sta ricominciando anche lei</h3><p>Anche i genitori stanno imparando l'italiano mentre lavorano e si adattano a un Paese nuovo: non sempre riescono a seguire i compiti. Serve uno strumento che affianchi il bambino quando loro non possono.</p></div>
+        <div class="card"><div class="big-emoji">📱</div><h3>Ma lo smartphone c'è</h3><p>È l'unico strumento sempre disponibile — a scuola e a casa. Da lì può esercitarsi da solo.</p></div>
+        <div class="card"><div class="big-emoji">👩‍🏫</div><h3>La maestra vuole seguirli tutti da vicino</h3><p>Può assegnare "compiti" travestiti da gioco fin dal primo giorno e seguire l'avanzamento di ogni bambino, capendo a colpo d'occhio chi va e chi ha bisogno di una spinta.</p></div>
+      </div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Partiamo dal profilo utente, uno solo e molto preciso, come chiedeva il bando. Un bambino NAI di sei anni, prima elementare. Non parla ancora l'italiano e spesso non legge in nessuna lingua: quindi non può leggere le consegne. A casa la famiglia sta ricominciando anche lei: i genitori stanno imparando l'italiano mentre lavorano e si adattano a un Paese nuovo, quindi non sempre possono seguire i compiti. Non è una mancanza di volontà, è una questione di tempo ed energie. L'unica costante è lo smartphone. E dall'altra parte c'è la maestra: con Primi Segni può assegnare dei "compiti" travestiti da gioco fin dal primo giorno e seguire da vicino l'avanzamento di ogni bambino, capendo a colpo d'occhio chi va e chi ha bisogno di una spinta. Tutte le scelte di prodotto discendono da questi quattro punti.</p></div>
+  </div>
+
+  <!-- 2 · SOLUZIONE -->
+  <div class="slide" data-index="2">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">La soluzione</span>
+        <h2>Ogni bambino è accolto e impara a scrivere, giocando</h2>
+      </div>
+      <ul class="bullets">
+        <li><span class="bullet-num">1</span><span><b>Audio-first + icone.</b> Ogni testo mostrato al bambino ha un equivalente parlato (TTS italiano). Testo scritto ridotto al minimo, target touch grandi.</span></li>
+        <li><span class="bullet-num">2</span><span><b>Login con avatar, non con email.</b> Il bambino tocca il proprio animaletto in una griglia: nessuna password, nessuna lettura richiesta.</span></li>
+        <li><span class="bullet-num">3</span><span><b>Ricalco col dito.</b> Segue il tracciato di una lettera o di un numero; l'app misura in tempo reale quanto resta "dentro i bordi".</span></li>
+        <li><span class="bullet-num">4</span><span><b>Feedback immediato e incoraggiante.</b> Quando sbaglia riceve aiuto mirato; quando finisce, fuochi d'artificio. Mai un voto, mai una frustrazione.</span></li>
+      </ul>
+      <div class="callout purple" style="margin-top:22px">La maestra assegna l'esercizio; il bambino lo svolge in autonomia e ripete finché il gesto si consolida; la maestra vede i progressi dal proprio cruscotto.</div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>La soluzione parte da un'idea semplice: ogni bambino è accolto. Basta un momento — la mamma gli passa il telefono e lui gioca, mentre intorno c'è la famiglia. Il messaggio che arriva alle famiglie è questo: il vostro bambino è stato accettato e lo stiamo preparando a inserirsi meglio nel nuovo mondo. Poi il come, punto per punto. Tutto è audio-first: ogni cosa che appare viene anche letta ad alta voce, e il testo scritto è ridotto al minimo. Il login è con avatar, non con email: il bambino tocca il proprio animaletto, senza password e senza dover leggere. Il cuore è il ricalco col dito, con una misura in tempo reale di quanto il tratto resta dentro i bordi. E il feedback è sempre incoraggiante: aiuto quando sbaglia, festa quando finisce, mai un voto.</p></div>
+  </div>
+
+  <!-- 3 · SCREENSHOT flusso bambino -->
+  <div class="slide" data-index="3">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header" style="margin-bottom:16px">
+        <span class="kicker">Dal vivo · flusso bambino</span>
+        <h2>Tre tocchi per iniziare a scrivere</h2>
+      </div>
+      <div class="shots-row shots-3">
+        <div class="phone"><div class="phone-frame"><img src="screens/01-home.png" alt="Schermata iniziale"></div><div class="phone-cap"><b>1.</b> Scelta ruolo, tutto letto ad alta voce</div></div>
+        <div class="phone"><div class="phone-frame"><img src="screens/02-avatar.png" alt="Login per avatar"></div><div class="phone-cap"><b>2.</b> "Chi sei?" — tocca la tua faccia</div></div>
+        <div class="phone"><div class="phone-frame"><img src="screens/03-oggi.png" alt="Esercizio del giorno"></div><div class="phone-cap"><b>3.</b> "Oggi studiamo…" scelto dalla maestra</div></div>
+      </div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Ecco il flusso del bambino, catturato dall'app vera. Prima schermata: scelgo se sono un bambino o la maestra — e anche questa frase viene letta. Seconda: "Chi sei?", una griglia di facce, tocco la mia e l'app mi saluta per nome. Terza: mi dice cosa studiamo oggi, l'esercizio scelto dalla maestra, sempre con la voce. In tre tocchi, senza leggere una parola, un bambino di sei anni è dentro l'esercizio.</p></div>
+  </div>
+
+  <!-- 4 · Il cuore: ricalco -->
+  <div class="slide" data-index="4">
+    <div class="slide-stage"><div class="slide-content"><div class="split">
+      <div class="txt">
+        <span class="kicker">Il cuore dell'app</span>
+        <h2>Ricalco col dito, misurato tratto per tratto</h2>
+        <ul class="bullets">
+          <li><span class="bullet-num">✏️</span><span>Un "binario" mostra la lettera; un pallino verde dice da dove partire.</span></li>
+          <li><span class="bullet-num">📐</span><span>Ogni punto del dito è testato con <b>isPointInStroke</b>: dentro o fuori dalla banda di tolleranza.</span></li>
+          <li><span class="bullet-num">💜</span><span>L'inchiostro segue il dito con <b>perfect-freehand</b>; la % "dentro i bordi" è il segnale chiave.</span></li>
+        </ul>
+      </div>
+      <div class="shots-row shots-1"><div class="phone"><div class="phone-frame"><img src="screens/04-esercizio-vuoto.png" alt="Canvas di ricalco"></div><div class="phone-cap">La lettera A: binario, linea tratteggiata e partenza</div></div></div>
+    </div></div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Questo è il cuore dell'app. Il bambino vede un "binario": la lettera disegnata come una banda spessa, con una linea tratteggiata al centro e un pallino verde che dice da dove partire. Mentre traccia col dito, ogni singolo punto viene testato con isPointInStroke — una funzione geometrica del canvas: sei dentro la banda di tolleranza, oppure fuori. L'inchiostro segue il dito in modo morbido grazie a perfect-freehand. Da questo esce un solo numero elegante: la percentuale di tratto rimasta dentro i bordi. È il segnale su cui gira tutto il resto.</p></div>
+  </div>
+
+  <!-- 5 · Feedback mirato + adattamento (screenshot puntini) -->
+  <div class="slide" data-index="5">
+    <div class="slide-stage"><div class="slide-content"><div class="split">
+      <div class="txt">
+        <span class="kicker">Capability agentica · a regole</span>
+        <h2>Feedback mirato sull'errore e puntini-guida</h2>
+        <ul class="bullets">
+          <li><span class="bullet-num">A</span><span><b>Fuori dai bordi</b> → incoraggiamento e "resta sulla linea".</span></li>
+          <li><span class="bullet-num">B</span><span><b>Stallo</b> (fermo troppo a lungo) → hint su dove ripartire.</span></li>
+          <li><span class="bullet-num">•••</span><span>Dopo <b>3 errori</b> fuori bordo compaiono i <b>puntini-guida</b>; quando il tratto migliora, spariscono.</span></li>
+        </ul>
+        <div class="callout" style="margin-top:8px">Screenshot reale: dopo alcuni sbagli l'app ha detto <b>"Ti aiuto io con i puntini!"</b> e li ha mostrati lungo la A.</div>
+      </div>
+      <div class="shots-row shots-1"><div class="phone"><div class="phone-frame"><img src="screens/05-tracciamento.png" alt="Puntini-guida attivati"></div><div class="phone-cap">Adattamento scattato dal vivo</div></div></div>
+    </div></div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Qui c'è la "capability agentica" richiesta dal bando — ma attenzione, è tutta logica a regole. L'app distingue due tipi di errore predefiniti e risponde in modo specifico, non generico. Se il dito esce dai bordi: incoraggiamento e "resta sulla linea". Se il bambino si blocca, fermo troppo a lungo: un hint su dove ripartire. E come adattamento della difficoltà, dopo tre errori fuori bordo compaiono i puntini-guida lungo il tratto; quando il bambino migliora, spariscono. Questo screenshot è vero: durante la cattura ho tracciato male apposta, l'app ha detto "Ti aiuto io con i puntini" e li ha disegnati sulla A. Nessun modello ha deciso nulla: è una soglia, tre errori.</p></div>
+  </div>
+
+  <!-- 6 · Vincolo no LLM + soglie -->
+  <div class="slide" data-index="6">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">Il vincolo che ci ha guidato</span>
+        <h2>Adattivo, ma <span class="text-gradient">zero LLM e zero ML</span></h2>
+        <p class="subtitle">I comportamenti "intelligenti" sono if e soglie deterministiche, in un unico posto condiviso — testati a unità.</p>
+      </div>
+      <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="metric"><div class="num">80%</div><div class="lbl">tratto dentro i bordi<br>= tratto "pulito"</div></div>
+        <div class="metric"><div class="num">3</div><div class="lbl">errori fuori bordo<br>→ puntini-guida</div></div>
+        <div class="metric"><div class="num">20s</div><div class="lbl">fermo<br>→ segnale di stallo</div></div>
+        <div class="metric"><div class="num">90s</div><div class="lbl">in difficoltà<br>→ pausa protetta</div></div>
+      </div>
+      <div class="callout purple" style="margin-top:22px">Le soglie vivono solo in <b>packages/shared</b> (il "contratto" web↔api), mai hardcodate nei componenti. Cambiare una regola = cambiare un numero, in un posto.</div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Questo è il vincolo che ha guidato tutto il progetto: l'app è adattiva, ma non integra né un LLM né machine learning. Ogni comportamento "intelligente" è un if con una soglia. Quattro numeri riassumono il sistema: sopra l'ottanta per cento dentro i bordi il tratto è pulito; dopo tre errori compaiono i puntini; venti secondi fermo è uno stallo; novanta secondi in difficoltà fanno scattare la pausa protetta. E la cosa importante per un ingegnere: queste soglie vivono in un unico pacchetto condiviso tra web e api, mai sparse nei componenti. Cambiare una regola significa cambiare un numero, in un posto solo, con i test a coprirlo.</p></div>
+  </div>
+
+  <!-- 7 · Rilevamento blocco + fuochi -->
+  <div class="slide" data-index="7">
+    <div class="slide-stage"><div class="slide-content"><div class="split">
+      <div class="txt">
+        <span class="kicker">Rilevamento del blocco</span>
+        <h2>Se si arena, l'app chiude con una festa — non con un fallimento</h2>
+        <ul class="bullets">
+          <li><span class="bullet-num">🎉</span><span>Esercizio finito → fuochi d'artificio in stile cartoon + "Evviva!".</span></li>
+          <li><span class="bullet-num">🎆</span><span>Blocco oltre soglia → "Per oggi abbiamo finito, yuppi!" + riposo meritato.</span></li>
+          <li><span class="bullet-num">📄</span><span>Il blocco lascia una <b>segnalazione scritta</b> nel report della maestra: "si è bloccato, ho proposto una pausa".</span></li>
+        </ul>
+      </div>
+      <div class="shots-row shots-1"><div class="phone"><div class="phone-frame"><img src="screens/06-fuochi.png" alt="Fuochi d'artificio"></div><div class="phone-cap">Chiusura sempre positiva</div></div></div>
+    </div></div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>La seconda capability è il rilevamento del blocco, e qui c'è una scelta di prodotto a cui teniamo molto. Quando l'esercizio finisce, partono i fuochi d'artificio: una festa. Ma anche quando il bambino si arena e resta bloccato oltre soglia, l'app non lo lascia sul fallimento: chiude comunque con "per oggi abbiamo finito, yuppi", fuochi, riposo meritato. Un bambino di sei anni non deve mai uscire dall'app con la sensazione di aver sbagliato. La differenza è che quel blocco lascia una traccia dove serve davvero: una segnalazione scritta nel report della maestra, che le dice che il bambino si è bloccato e che l'app ha proposto una pausa.</p></div>
+  </div>
+
+  <!-- 8 · Maestra: dashboard + report -->
+  <div class="slide" data-index="8">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header" style="margin-bottom:16px">
+        <span class="kicker">Dal vivo · flusso maestra</span>
+        <h2>Un cruscotto per la classe, un mini-report per ogni bambino</h2>
+      </div>
+      <div class="shots-row shots-3">
+        <div class="phone"><div class="phone-frame"><img src="screens/08-maestra-dashboard.png" alt="Dashboard maestra"></div><div class="phone-cap">Elenco classe + assegnazione esercizi</div></div>
+        <div class="phone"><div class="phone-frame"><img src="screens/09-report-amir.png" alt="Report Amir"></div><div class="phone-cap"><b>Amir:</b> precisione <b>45%→67%</b>, più autonomo</div></div>
+        <div class="phone"><div class="phone-frame"><img src="screens/10-report-fatima.png" alt="Report Fatima"></div><div class="phone-cap"><b>Fatima:</b> in calo, due avvisi "Attenzione" nel report</div></div>
+      </div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Passiamo alla maestra, di nuovo con screenshot reali. Entra con un SSO finto della scuola e vede il cruscotto della classe: l'elenco dei bambini e, in alto, l'assegnazione degli esercizi al singolo o a tutti. Per ogni bambino c'è un mini-report scritto a parole, tono osservativo, nessun voto. Amir è la nostra storia di successo: la precisione è passata dal 45 al 67 per cento e chiede meno aiuti — sta diventando autonomo, e il grafico è verde in salita. Fatima invece fatica: precisione in calo, e il report la segnala con due avvisi "Attenzione" — che fatica a superare l'esercizio e che almeno una volta si è bloccata. La maestra, in un colpo d'occhio, sa su chi intervenire.</p></div>
+  </div>
+
+  <!-- 9 · Miglioramento misurabile -->
+  <div class="slide" data-index="9">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">Il miglioramento è misurabile</span>
+        <h2>Un solo segnale, che copre tre cose insieme</h2>
+        <p class="subtitle">La % di tratto dentro i bordi è insieme la metrica, l'errore che innesca il feedback e ciò che guida l'adattamento.</p>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric"><div class="num">↑</div><div class="lbl"><b>Accuratezza</b><br>% dentro i bordi in salita, tentativo dopo tentativo</div></div>
+        <div class="metric"><div class="num">↓</div><div class="lbl"><b>Tempo & stalli</b><br>completa più in fretta, si ferma di meno</div></div>
+        <div class="metric"><div class="num">↓</div><div class="lbl"><b>Aiuti richiesti</b><br>meno puntini = più autonomia</div></div>
+      </div>
+      <div class="callout" style="margin-top:22px"><b>Prima:</b> non sa restare nei bordi senza aiuto. &nbsp;→&nbsp; <b>Dopo un ciclo di sessioni:</b> traccia da solo, senza puntini e senza hint. Verificato dal trend nel report — non da un'opinione.</div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Perché tutto questo è un vero miglioramento misurabile, e non una sensazione. Abbiamo scelto un solo segnale, che copre tre cose insieme: la percentuale di tratto dentro i bordi. È la metrica che sale, è l'errore che fa scattare il feedback, ed è ciò che guida l'adattamento. Attorno a questo tracciamo accuratezza in salita, tempo e stalli in discesa, aiuti richiesti in calo. Il "prima e dopo" è oggettivo: prima il bambino non resta nei bordi senza aiuto, dopo un ciclo di sessioni traccia da solo senza puntini e senza hint. E lo si legge nel trend del report, non in un'opinione. Nella demo lo abbiamo mostrato con dati storici e una sessione dal vivo.</p></div>
+  </div>
+
+  <!-- 10 · Stack -->
+  <div class="slide" data-index="10">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">Come è fatta</span>
+        <h2>Una PWA leggera, installabile, che funziona anche offline</h2>
+      </div>
+      <div class="cards-grid three">
+        <div class="card"><div class="big-emoji">📱</div><h3>apps/web</h3><p>React 19 + Vite + styled-components, PWA installabile. Pointer Events, glifi SVG, perfect-freehand, Web Speech API per l'audio.</p></div>
+        <div class="card"><div class="big-emoji">⚙️</div><h3>apps/api</h3><p>Fastify + SQLite, validazione zod. Logga ogni tentativo e calcola i report a regole. Serve la PWA same-origin.</p></div>
+        <div class="card"><div class="big-emoji">🔗</div><h3>packages/shared</h3><p>Il "contratto": tipi e soglie condivisi tra web e api. Un'unica fonte di verità, mai duplicata.</p></div>
+      </div>
+      <div class="callout purple" style="margin-top:20px">Monorepo npm workspaces, TypeScript strict ESM, Node 24. Costruito in <b>5 ore</b>, in 2 persone, con Claude Code: subagenti per l'esplorazione, pipeline <b>/feature</b>, revisione del diff prima di ogni commit.</div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Due parole sull'architettura, perché è coerente con il target. È una PWA leggera e installabile, che grazie al service worker funziona anche offline — fondamentale per chi ha connettività intermittente. Il web è React con Vite; l'input tattile usa i Pointer Events, i glifi sono path SVG, l'inchiostro è perfect-freehand e l'audio la Web Speech API di sistema. L'api è Fastify con SQLite, che registra ogni tentativo e calcola i report. E in mezzo c'è il pacchetto shared, il contratto con tipi e soglie condivisi. Tutto in TypeScript strict. L'abbiamo costruita in cinque ore, in due, usando Claude Code in modo strutturato: subagenti per esplorare, una pipeline per le feature, e sempre la review del diff prima del commit.</p></div>
+  </div>
+
+  <!-- 11 · Come si evolve -->
+  <div class="slide" data-index="11">
+    <div class="slide-stage"><div class="slide-content">
+      <div class="slide-header">
+        <span class="kicker">Come si può evolvere</span>
+        <h2>Da un MVP curato a una piattaforma per l'inclusione</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="card"><div class="big-emoji">🐝</div><h3>Nuovi giochi language-free</h3><p>Il "gioco dell'ape" (pensiero computazionale) e il "diario del tempo" (vocabolario) sono già mockup: bastano da riempire.</p></div>
+        <div class="card"><div class="big-emoji">🔡</div><h3>Alfabeto e numeri completi</h3><p>Oggi A·E·I·O·M e 1·2·3. La meccanica è identica: aggiungere un glifo è un dato, non codice nuovo.</p></div>
+        <div class="card"><div class="big-emoji">🌍</div><h3>Onboarding nella lingua madre</h3><p>Istruzioni audio in arabo, ucraino, urdu… solo per le prime spiegazioni. In classe si pratica l'italiano.</p></div>
+        <div class="card"><div class="big-emoji">📄</div><h3>Report verso il PDP</h3><p>Esportabile, con più indicatori nel tempo, per alimentare il Piano Didattico Personalizzato — se la maestra lo ritiene.</p></div>
+      </div>
+    </div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>E adesso il futuro, quattro direzioni concrete. Primo: nuovi giochi language-free — nell'app ci sono già le tessere placeholder del gioco dell'ape, per il pensiero computazionale, e del diario del tempo, per il vocabolario; sono candidati naturali per una versione due. Secondo: completare alfabeto e numeri — oggi abbiamo cinque lettere e tre cifre, ma la meccanica è la stessa, aggiungere un glifo è un dato, non codice nuovo. Terzo: un onboarding nella lingua madre, arabo, ucraino, urdu, solo per le prime spiegazioni, perché poi in classe si pratica l'italiano. Quarto: il report esportabile verso il PDP, il Piano Didattico Personalizzato, con più indicatori nel tempo — ma sempre lasciando la decisione alla maestra. Nessuna di queste rompe il vincolo: restano tutte a regole.</p></div>
+  </div>
+
+  <!-- 12 · CLOSING -->
+  <div class="slide" data-index="12">
+    <div class="slide-stage"><div class="slide-content"><div class="cover-center">
+      <span class="kicker">Grazie</span>
+      <h2 class="closing-title"><span class="text-gradient">Un bambino impara praticando in autonomia. La maestra vede il progresso.</span></h2>
+      <p class="cover-subtitle">Ovunque parta, ogni bambino ha la stessa possibilità di fare pratica e di sentirsi parte della classe — sul telefono che ha già in mano. Tecnologia semplice e trasparente, con la scuola che lo accompagna passo passo.</p>
+      <div class="chips"><span class="chip chip-purple">Audio-first</span><span class="chip chip-purple">Feedback a regole</span><span class="chip chip-purple">Report per il PDP</span><span class="chip chip-purple">🥈 2° posto</span></div>
+      <p style="margin-top:28px;font-size:17px;color:rgba(255,255,255,0.75)">Grazie! — <b style="color:#fff">Pio Stravino</b> &amp; <b style="color:#fff">Manuel Bisanti</b></p>
+    </div></div></div>
+    <div class="notes-panel"><div class="notes-label">Note relatore</div><p>Chiudo con il messaggio che vorremmo restasse. Primi Segni dà a ogni bambino la stessa possibilità di fare pratica e di sentirsi parte della classe, ovunque parta: un bambino appena arrivato da un altro Paese, ma anche un bambino cresciuto qui che a casa non trova gli strumenti per esercitarsi. Basta il telefono che ha già in mano, con una tecnologia semplice e trasparente. E dall'altra parte la maestra lo accompagna passo passo: vede il progresso e ha materiale concreto, se lo ritiene, per il Piano Didattico Personalizzato. Grazie.</p></div>
+  </div>
+
+</div>
+
+<div id="nav">
+  <button class="btn-prev" id="btn-prev" disabled>← Indietro</button>
+  <div id="dots"></div>
+  <button class="btn-next" id="btn-next">Avanti →</button>
+</div>
+<p id="hint">Frecce ← → o barra spaziatrice · N per le note</p>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const fill = document.getElementById('progress-fill');
+  const cur = document.getElementById('cur');
+  const tot = document.getElementById('tot');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const notesToggle = document.getElementById('notes-toggle');
+  const dotsWrap = document.getElementById('dots');
+  let idx = 0, notesVisible = false;
+
+  tot.textContent = String(total).padStart(2,'0');
+  const dots = [];
+  for (let i=0;i<total;i++){
+    const b=document.createElement('button');
+    b.className='dot-btn'+(i===0?' active':''); b.setAttribute('aria-label','Slide '+(i+1));
+    b.addEventListener('click',()=>show(i)); dotsWrap.appendChild(b); dots.push(b);
+  }
+
+  function show(n){
+    n=Math.max(0,Math.min(total-1,n));
+    slides[idx].classList.remove('active'); dots[idx].classList.remove('active');
+    idx=n;
+    slides[idx].classList.add('active'); dots[idx].classList.add('active');
+    fill.style.width=((idx+1)/total*100)+'%';
+    cur.textContent=String(idx+1).padStart(2,'0');
+    btnPrev.disabled=idx===0; btnNext.disabled=idx===total-1;
+    document.querySelectorAll('.notes-panel').forEach(p=>p.classList.remove('visible'));
+    if(notesVisible){const p=slides[idx].querySelector('.notes-panel'); if(p)p.classList.add('visible');}
+  }
+  slides[0].classList.add('active');
+  fill.style.width=(1/total*100)+'%';
+
+  btnPrev.addEventListener('click',()=>show(idx-1));
+  btnNext.addEventListener('click',()=>show(idx+1));
+  notesToggle.addEventListener('click',()=>{
+    notesVisible=!notesVisible; notesToggle.classList.toggle('active',notesVisible);
+    const p=slides[idx].querySelector('.notes-panel'); if(p)p.classList.toggle('visible',notesVisible);
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(idx+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(idx-1);}
+    else if(e.key==='Home'){e.preventDefault();show(0);}
+    else if(e.key==='End'){e.preventDefault();show(total-1);}
+    else if(e.key==='n'||e.key==='N'){e.preventDefault();notesToggle.click();}
+  });
+})();
+</script>
+</body>
+</html>
